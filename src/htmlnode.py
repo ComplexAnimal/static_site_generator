@@ -1,5 +1,3 @@
-from enum import Enum
-
 class HTMLNode:
 
     def __init__(self, tag=None, value=None, children=None, props=None):
@@ -29,3 +27,36 @@ class HTMLNode:
     
     def __repr__(self):
         return f'HTMLNode({self.tag}, {self.value}, {self.children}, {self.props})'
+
+
+class LeafNode(HTMLNode):
+    
+    def __init__(self, tag, value, props=None):
+        super().__init__(tag, value, None, props)
+
+    def to_html(self):
+        if not self.value:
+            raise ValueError("Error: Leaf nodes must have a value")
+        if not self.tag:
+            return self.value
+        if not self.props:
+            return f'<{self.tag}>{self.value}</{self.tag}>'
+        else:
+            return f'<{self.tag}{super().props_to_html()}>{self.value}</{self.tag}>'
+        
+    def __repr__(self):
+        return f'LeafNode({self.tag}, {self.value}, {self.props})'
+
+
+class ParentNode(HTMLNode):
+
+    def __init__(self, tag, children, props=None):
+        super().__init__(tag, None, children, props)
+
+    def to_html(self):
+        if not self.tag:
+            raise ValueError("Error: Parent nodes must have a tag")
+        if self.children is None:
+            raise ValueError("Error: Parent nodes must have children")
+        else:
+            return f"<{self.tag}>" + "".join(child.to_html() for child in self.children) + f"</{self.tag}>"
