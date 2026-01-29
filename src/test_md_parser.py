@@ -142,6 +142,12 @@ class TestSplitNodesImage(unittest.TestCase):
         actual_result = split_nodes_image([node1, node2])
         self.assertListEqual(expected_result, actual_result)
 
+    def test_split_node_with_no_image(self):
+        node = TextNode("There is no image here", TextType.TEXT)
+        expected_result = [node]
+        actual_result = split_nodes_image([node])
+        self.assertListEqual(expected_result, actual_result)
+
 
 if __name__ == "__main__":
     unittest.main()
