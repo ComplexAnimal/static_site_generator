@@ -4,35 +4,25 @@ from textnode import TextType, TextNode
 
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
-
     new_nodes = []
-
     for node in old_nodes:
-
-        if node.text_type != TextType.TEXT:
+        if node.text_type != TextType.TEXT or delimiter not in node.text:
             new_nodes.append(node)
-
         else:
             split_nodes = node.text.split(delimiter)
-
             if len(split_nodes) < 3 or len(split_nodes) % 2 == 0:
                 raise Exception("Error: The text is missing a closing delimiter")
-            
             else:
                 node_group = []
-
                 for i in range(len(split_nodes)):
-
                     if i % 2 == 0: # Should always be plain text
-                        new_node = TextNode(split_nodes[i], TextType.TEXT)
-                        node_group.append(new_node)
-
+                        if split_nodes[i] != "":
+                            new_node = TextNode(split_nodes[i], TextType.TEXT)
+                            node_group.append(new_node)
                     else: # For all other text types
                         new_node = TextNode(split_nodes[i], text_type)
                         node_group.append(new_node)
-
                 new_nodes.extend(node_group)
-
     return new_nodes
 
 
@@ -86,3 +76,13 @@ def split_nodes_link(old_nodes):
                 if i == len(links) - 1 and remaining != "":
                     new_nodes.append(TextNode(remaining, TextType.TEXT))
     return new_nodes
+
+
+def text_to_text_nodes(text):
+    root_node = TextNode(text, TextType.TEXT)
+    with_images = split_nodes_image([root_node])
+    with_links = split_nodes_link(with_images)
+    with_bold = split_nodes_delimiter(with_links, "**", TextType.BOLD)
+    with_italic = split_nodes_delimiter(with_bold, "_", TextType.ITAL)
+    nodes_list = split_nodes_delimiter(with_italic, "`", TextType.CODE) # with code
+    return nodes_list
