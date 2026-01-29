@@ -149,5 +149,79 @@ class TestSplitNodesImage(unittest.TestCase):
         self.assertListEqual(expected_result, actual_result)
 
 
+class TestSplitNodesLink(unittest.TestCase):
+    def test_split_links(self):
+        node = TextNode(
+            "This is text with a [link](https://www.google.com) and another [second link](https://www.boot.dev)",
+            TextType.TEXT,
+        )
+        expected_result = [
+            TextNode("This is text with a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://www.google.com"),
+            TextNode(" and another ", TextType.TEXT),
+            TextNode("second link", TextType.LINK, "https://www.boot.dev"),
+        ]
+        actual_result = split_nodes_link([node])
+        self.assertListEqual(expected_result, actual_result)
+
+    def test_split_leading_link(self):
+        node = TextNode(
+            "[This](https://www.google.com) is a link",
+            TextType.TEXT
+        )
+        expected_result = [
+            TextNode("This", TextType.LINK, "https://www.google.com"),
+            TextNode(" is a link", TextType.TEXT),
+        ]
+        actual_result = split_nodes_link([node])
+        self.assertListEqual(expected_result, actual_result)
+
+    def test_split_trailing_link(self):
+        node = TextNode(
+            "This is a [link](https://www.google.com)",
+            TextType.TEXT
+        )
+        expected_result = [
+            TextNode("This is a ", TextType.TEXT),
+            TextNode("link", TextType.LINK, "https://www.google.com"),
+        ]
+        actual_result = split_nodes_link([node])
+        self.assertListEqual(expected_result, actual_result)
+
+    def test_split_only_link(self):
+        node = TextNode(
+            "[This is a link](https://www.google.com)",
+            TextType.TEXT
+        )
+        expected_result = [
+            TextNode("This is a link", TextType.LINK, "https://www.google.com"),
+        ]
+        actual_result = split_nodes_link([node])
+        self.assertListEqual(expected_result, actual_result)
+
+    def test_split_multiple_nodes_with_links(self):
+        node1 = TextNode(
+            "This is text with [link1](https://www.google.com)",
+            TextType.TEXT
+        )
+        node2 = TextNode(
+            "And here's [link2](https://www.boot.dev)",
+            TextType.TEXT
+        )
+        expected_result = [
+            TextNode("This is text with ", TextType.TEXT),
+            TextNode("link1", TextType.LINK, "https://www.google.com"),
+            TextNode("And here's ", TextType.TEXT),
+            TextNode("link2", TextType.LINK, "https://www.boot.dev"),
+        ]
+        actual_result = split_nodes_link([node1, node2])
+        self.assertListEqual(expected_result, actual_result)
+
+    def test_split_node_with_no_link(self):
+        node = TextNode("There is no link here", TextType.TEXT)
+        expected_result = [node]
+        actual_result = split_nodes_link([node])
+        self.assertListEqual(expected_result, actual_result)
+
 if __name__ == "__main__":
     unittest.main()
