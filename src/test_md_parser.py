@@ -1,7 +1,9 @@
 import unittest
 
 from textnode import TextNode, TextType
-from md_parser import split_nodes_delimiter, extract_markdown_images, extract_markdown_links, split_nodes_image, split_nodes_link, text_to_text_nodes
+from md_parser import (split_nodes_delimiter, extract_markdown_images,
+                       extract_markdown_links, split_nodes_image, split_nodes_link,
+                       text_to_text_nodes, markdown_to_blocks)
 
 
 class TestSplitNodesDelimiter(unittest.TestCase):
@@ -276,6 +278,97 @@ class TestTextToTextNodes(unittest.TestCase):
         ]
         actual_result = text_to_text_nodes(text)
         self.assertEqual(expected_result, actual_result)
+
+
+class TestMarkdownToBlocks(unittest.TestCase):
+    def test_clean_markdown_to_blocks(self):
+        md = """
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_markdown_with_excessive_newlines(self):
+        md = """
+This is **bolded** paragraph
+
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+
+
+
+- This is a list
+- with items
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_markdown_with_leading_and_trailing_newlines(self):
+        md = """
+
+
+
+This is **bolded** paragraph
+
+This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line
+
+- This is a list
+- with items
+
+
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
+
+    def test_markdown_with_leading_and_trailing_spaces(self):
+        md = """
+    This is **bolded** paragraph   
+
+  This is another paragraph with _italic_ text and `code` here
+This is the same paragraph on a new line      
+
+ - This is a list
+- with items   
+"""
+        blocks = markdown_to_blocks(md)
+        self.assertEqual(
+            blocks,
+            [
+                "This is **bolded** paragraph",
+                "This is another paragraph with _italic_ text and `code` here\nThis is the same paragraph on a new line",
+                "- This is a list\n- with items",
+            ],
+        )
 
 
 if __name__ == "__main__":
