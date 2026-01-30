@@ -3,7 +3,8 @@ import unittest
 from textnode import TextNode, TextType
 from md_parser import (split_nodes_delimiter, extract_markdown_images,
                        extract_markdown_links, split_nodes_image, split_nodes_link,
-                       text_to_text_nodes, markdown_to_blocks)
+                       text_to_text_nodes, markdown_to_blocks, block_to_block_type,
+                       BlockType)
 
 
 class TestSplitNodesDelimiter(unittest.TestCase):
@@ -369,6 +370,105 @@ This is the same paragraph on a new line
                 "- This is a list\n- with items",
             ],
         )
+
+
+class TestBlockToBlockType(unittest.TestCase):
+
+    def test_heading_with_min_hashes(self):
+        block = "# Heading"
+        self.assertEqual(block_to_block_type(block), BlockType.HEADING)
+
+    def test_heading_with_max_hashes(self):
+        block = "###### Heading"
+        self.assertEqual(block_to_block_type(block), BlockType.HEADING)
+
+    def test_heading_with_extra_spaces(self):
+        block = "###   Heading"
+        self.assertEqual(block_to_block_type(block), BlockType.HEADING)
+
+    def test_heading_missing_space(self): # should be paragraph
+        block = "#####Heading"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_heading_too_many_hashes(self): # should be paragraph
+        block = "####### Heading"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_code_empty(self):
+        block = "```\n```"
+        self.assertEqual(block_to_block_type(block), BlockType.CODE)
+
+    def test_code_clean(self):
+        block = "```\nThis is some code\nThe code keeps going```"
+        self.assertEqual(block_to_block_type(block), BlockType.CODE)
+
+    def test_code_missing_a_backtick(self): # should be paragraph
+        block = "```\nThis is bad code``"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_code_missing_newline(self): # should be paragraph
+        block = "```This is bad code```"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_code_with_extra_newlines(self):
+        block = "```\n\nThis is some code\n```"
+        self.assertEqual(block_to_block_type(block), BlockType.CODE)
+
+    def test_quote_clean(self):
+        block = ">This is a quote\n> This is another\n>      Here's yet another"
+        self.assertEqual(block_to_block_type(block), BlockType.QUOTE)
+
+    def test_quote_with_blank_lines(self):
+        block = "> This quote has\n>\n>\n> some empty lines"
+        self.assertEqual(block_to_block_type(block), BlockType.QUOTE)
+
+    def test_quote_with_missing_character(self): # should be paragraph
+        block = "> This is a quote\n This is not"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_unordered_list_clean(self):
+        block = "- This\n- is\n- an\n- unordered\n- list"
+        self.assertEqual(block_to_block_type(block), BlockType.UNORDERED_LIST)
+
+    def test_unordered_list_with_blank_lines(self):
+        block = "- This\n- has\n- \n- blank\n- \n- lines"
+        self.assertEqual(block_to_block_type(block), BlockType.UNORDERED_LIST)
+
+    def test_unordered_list_with_extra_spaces(self):
+        block = "- This\n-  list\n-   has\n-    extra\n-     spaces "
+        self.assertEqual(block_to_block_type(block), BlockType.UNORDERED_LIST)
+
+    def test_unordered_list_missing_character(self): # should be paragraph
+        block = "- This\n- isn't\n a\n- list"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_unordered_list_missing_space(self): # should be paragraph
+        block = "- This\n-isn't\n- a\n- list"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_ordered_list_clean(self):
+        block = "1. This list\n2. has three\n3. lines"
+        self.assertEqual(block_to_block_type(block), BlockType.ORDERED_LIST)
+
+    def test_ordered_list_with_wrong_number(self): # should be paragraph
+        block = "1. This\n2. is\n5. wrong"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_ordered_list_with_missing_number(self): # should be paragraph
+        block = "1. This is\n2. missing a\n. number"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_ordered_list_with_missing_period(self): # should be paragraph
+        block = "1. This is\n2 missing a\n3. period"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_ordered_list_with_missing_space(self): # should be paragraph
+        block = "1.This\n2. is\n3. wrong"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
+
+    def test_ordered_list_starts_with_space(self): # should be paragraph
+        block = " 1. Not\n2. a\n3. list"
+        self.assertEqual(block_to_block_type(block), BlockType.PARAGRAPH)
 
 
 if __name__ == "__main__":
