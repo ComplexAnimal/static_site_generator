@@ -41,9 +41,11 @@ class LeafNode(HTMLNode):
             return self.value
         if not self.props:
             return f'<{self.tag}>{self.value}</{self.tag}>'
-        else:
+        elif self.tag == "a": # link
             return f'<{self.tag}{super().props_to_html()}>{self.value}</{self.tag}>'
-        
+        else: # image
+            return f'<{self.tag}{super().props_to_html()}>'
+
     def __repr__(self):
         return f'LeafNode({self.tag}, {self.value}, {self.props})'
 
