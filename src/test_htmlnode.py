@@ -14,13 +14,22 @@ class TestHTMLNode(unittest.TestCase):
         node2 = HTMLNode("p", "This is some text", None, {"href": "https://www.google.com"})
         self.assertNotEqual(node, node2)
 
-    def test_props_to_html(self):
+    def test_link_props_to_html(self):
         props_dict = {
             "href": "https://www.google.com",
             "target": "_blank",
         }
         props_string = ' href="https://www.google.com" target="_blank"'
         node = HTMLNode("a", "This is a link", None, props_dict)
+        self.assertEqual(node.props_to_html(), props_string)
+
+    def test_image_props_to_html(self):
+        props_dict = {
+            "src": "https://www.an_image.com",
+            "alt": "An image"
+        }
+        props_string = ' src="https://www.an_image.com" alt="An image"'
+        node = HTMLNode("img", "", None, props_dict)
         self.assertEqual(node.props_to_html(), props_string)
 
         
@@ -63,7 +72,7 @@ class TestParentNode(unittest.TestCase):
 
     def test_to_html_with_large_family(self):
         baby1 = LeafNode("a", "link", {"href": "https://www.google.com"})
-        baby2 = LeafNode("i", "italic")
+        baby2 = LeafNode("img", " ", {"src": "https://www.an_image.com", "alt": "An image"})
         child1 = LeafNode("p", "paragraph")
         child2 = LeafNode("b", "bold")
         child3 = ParentNode("h1", [baby1, baby2])
@@ -71,7 +80,7 @@ class TestParentNode(unittest.TestCase):
         parent = ParentNode("ul", children)
         self.assertEqual(
             parent.to_html(),
-            '<ul><p>paragraph</p><b>bold</b><h1><a href="https://www.google.com">link</a><i>italic</i></h1></ul>'
+            '<ul><p>paragraph</p><b>bold</b><h1><a href="https://www.google.com">link</a><img src="https://www.an_image.com" alt="An image"></h1></ul>'
         )
 
     def test_to_html_empty_tag(self):
