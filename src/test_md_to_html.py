@@ -1,7 +1,6 @@
 import unittest
 
 from md_to_html import markdown_to_html_node
-from htmlnode import HTMLNode, LeafNode, ParentNode
 
 
 class TestMarkdownToHTML(unittest.TestCase):
@@ -71,7 +70,7 @@ This is another paragraph with _italic_ text and `code` here
             )
         )
 
-    def test_unordered_list(self):
+    def test_unordered_lists(self):
         md = """
 - Just a list
 - with 2 lines
@@ -98,7 +97,7 @@ This is another paragraph with _italic_ text and `code` here
             )
         )
 
-    def test_ordered_list(self):
+    def test_ordered_lists(self):
         md = """
 1. This list
 2. has three
