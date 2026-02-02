@@ -1,7 +1,12 @@
-from textnode import TextType, TextNode
+import os
+import shutil
+
+from copy_dir import copy_dir
 
 def main():
-    test_node = TextNode("This is a **test**", "bold")
-    print(test_node)
+    src = os.path.abspath("static")
+    dst = os.path.abspath("public")
+
+    copy_dir(src, dst)
 
 main()
