@@ -8,12 +8,12 @@ from generate_page import generate_pages_recursive
 def main():
 
     src = os.path.abspath("static")
-    dst = os.path.abspath("public")
+    dst = os.path.abspath("docs")
     copy_dir(src, dst)
 
     from_path = Path("content")
     temp_path = Path("template.html")
-    dest_path = Path("public")
+    dest_path = Path("docs")
 
     if len(sys.argv) > 1:
         basepath = sys.argv[1]
